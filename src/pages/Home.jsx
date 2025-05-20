@@ -1,15 +1,23 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { motion } from 'framer-motion';
 import getIcon from '../utils/iconUtils';
 import MainFeature from '../components/MainFeature';
+import { AuthContext } from '../App';
+import { useSelector } from 'react-redux';
 
-function Home({ darkMode, toggleDarkMode }) {
+function Home({ darkMode, toggleDarkMode, userPreference, isLoading }) {
+  const { logout } = useContext(AuthContext);
+  const userState = useSelector((state) => state.user);
+  
   // Icon components
   const MoonIcon = getIcon('Moon');
   const SunIcon = getIcon('Sun');
   const CalculatorIcon = getIcon('Calculator');
   const GithubIcon = getIcon('Github');
+  const LogOutIcon = getIcon('LogOut');
+  const UserIcon = getIcon('User');
   
+  // If loading, show loading indicator
   return (
     <motion.div
       className="min-h-screen flex flex-col"
@@ -28,6 +36,21 @@ function Home({ darkMode, toggleDarkMode }) {
           </div>
           
           <div className="flex items-center space-x-2">
+            {userState.isAuthenticated && (
+              <>
+                <div className="hidden md:flex items-center mr-2 text-sm text-surface-600 dark:text-surface-400">
+                  <UserIcon className="w-4 h-4 mr-1" />
+                  <span>{userState.user?.firstName || userState.user?.emailAddress}</span>
+                </div>
+                <button
+                  onClick={logout}
+                  className="p-2 rounded-full bg-surface-100 dark:bg-surface-800 hover:bg-surface-200 dark:hover:bg-surface-700 transition-colors"
+                  aria-label="Log out"
+                >
+                  <LogOutIcon className="w-5 h-5 text-surface-600 dark:text-surface-300" />
+                </button>
+              </>
+            )}
             <button
               onClick={toggleDarkMode}
               className="p-2 rounded-full bg-surface-100 dark:bg-surface-800 hover:bg-surface-200 dark:hover:bg-surface-700 transition-colors"
@@ -62,7 +85,11 @@ function Home({ darkMode, toggleDarkMode }) {
             </p>
           </div>
           
-          <MainFeature />
+          {isLoading ? (
+            <div className="flex justify-center items-center h-64">Loading calculator data...</div>
+          ) : (
+            <MainFeature userPreference={userPreference} />
+          )}
         </section>
       </main>
       
